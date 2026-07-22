@@ -6,6 +6,8 @@ from schemas import UserCreate, UserOut
 from auth import hash_password
 from auth import hash_password, verify_password, create_access_token
 from schemas import UserLogin
+from auth import get_current_user
+from fastapi.security import OAuth2PasswordRequestForm
 
 app = FastAPI()
 
@@ -31,14 +33,6 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
     db.refresh(new_user)
     return new_user
 
-
-# Look up the user by email: db.query(User).filter(User.email == credentials.email).first()
-# If no user is found, raise an error — raise HTTPException(status_code=401, detail="Invalid credentials")
-# If a user IS found, use verify_password(credentials.password, user.password_hash) to check the password
-# If it doesn't match, raise the same 401 error (deliberately the same message as "no user found" — think about why revealing "user not found" vs "wrong password" separately could be a security issue)
-# If everything checks out, create a token: create_access_token({"sub": str(user.id)}) and return it, typically shaped like {"access_token": token, "token_type": "bearer"}
-
-
 @app.post("/login")
 def login(credentials: UserLogin, db: Session = Depends(get_db)):
     # look up user by their email
@@ -57,3 +51,7 @@ def login(credentials: UserLogin, db: Session = Depends(get_db)):
     else:
         token = create_access_token({"sub": str(current_user.id)})
         return {"access_token": token, "token_type": "bearer"}
+    
+@app.get("/me", response_model=UserOut)
+def read_current_user(current_user: User = Depends(get_current_user)):
+    return current_user
