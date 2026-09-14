@@ -74,4 +74,4 @@ Then visit `http://127.0.0.1:8000/docs` to interact with the API.
 
 - **Case sensitivity in company names:** Company name matching is now normalized with `.title()` on write and lookup, but this was fixed partway through development — a small number of earlier test records may still contain duplicate companies with inconsistent casing. In a production system, this would require a one-time data migration to merge and clean up existing rows.
 - **No frontend yet:** The API is currently only usable via the interactive `/docs` interface. A React frontend is planned as the next phase of this project.
-- **No route to view status history directly:** `StatusHistory` rows are created automatically on every status update, but there's currently no `GET` endpoint to retrieve that history — planned for a future update.
+- **No route to view status history directly:** `StatusHistory` rows are created automatically on every status update, but there's currently no `GET` endpoint to retrieve that history.
