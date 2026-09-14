@@ -2,7 +2,7 @@
 
 A full-stack job application tracker backend — built to help job seekers log applications, track their status over time, and see their history in one place, rather than losing track across spreadsheets and email threads.
 
-**Live API docs:** `https://job-application-tracker-production-1cb4.up.railway.app//docs`
+**Live API docs:** `https://job-application-tracker-production-1cb4.up.railway.app/docs`
 
 ## Tech Stack
 
