@@ -8,8 +8,8 @@ from auth import hash_password, verify_password, create_access_token
 from schemas import UserLogin
 from auth import get_current_user
 from fastapi.security import OAuth2PasswordRequestForm
-from schemas import ApplicationCreate, ApplicationOut
-from models import Application, Company
+from schemas import ApplicationCreate, ApplicationOut, StatusUpdate
+from models import Application, Company, StatusHistory
 
 # create FastAPI instance and the get_db() function to create a new database session for each request
 # auth.py tools used here to hash passwords, verify passwords, create JWT tokens, and get the current user from a token
@@ -59,13 +59,18 @@ def login(credentials: UserLogin, db: Session = Depends(get_db)):
 def read_current_user(current_user: User = Depends(get_current_user)):
     return current_user
 
+# allows users to add new applications to the database, creating a new company if it doesn't already exist, 
+# and linking the application to the current user
 @app.post("/applications", response_model=ApplicationOut)
 def create_application(application: ApplicationCreate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    # normalize company name to title case
+    normalized_name = application.company_name.title()
+
     # check if company already exists in database
-    company = db.query(Company).filter(Company.name == application.company_name).first()
+    company = db.query(Company).filter(Company.name == normalized_name).first()
     # if company doesn't exist, create a new company
     if not company:
-        company = Company(name=application.company_name)
+        company = Company(name=normalized_name)
         db.add(company)
         db.commit()
         db.refresh(company)
@@ -83,3 +88,24 @@ def create_application(application: ApplicationCreate, current_user: User = Depe
     db.commit()
     db.refresh(new_application)
     return new_application
+
+@app.get("/applications", response_model=list[ApplicationOut])
+def read_applications(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    applications = db.query(Application).filter(Application.user_id == current_user.id).all()
+    return applications
+
+@app.patch("/applications/{id}/status", response_model=ApplicationOut)
+def update_application_status(id: int, status_update: StatusUpdate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    application = db.query(Application).filter(Application.id == id, Application.user_id == current_user.id).first()
+    # raise on exception if application not found
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+
+    application.current_status = status_update.status
+    # update the status history table with the new status along with updating the status of the application
+    update_status_history = StatusHistory(application_id=application.id, status=status_update.status)
+
+    db.add(update_status_history)
+    db.commit()
+    db.refresh(application)
+    return application
