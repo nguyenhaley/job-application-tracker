@@ -34,6 +34,11 @@ def get_db():
 
 @app.post("/signup", response_model=UserOut)
 def signup(user: UserCreate, db: Session = Depends(get_db)): 
+    # check if user already exists in database
+    existing_user = db.query(User).filter(User.email == user.email).first()
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
     # hash user password using hash_password()
     hashed_password = hash_password(user.password)
     # create new_user object with email and hashed password
