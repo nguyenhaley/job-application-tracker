@@ -3,6 +3,9 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from database import Base
 
+# defines database schema as python classes that SQLAlchemy can use to create tables in the database 
+# each class represents a table, and each attribute represents a column in that table.
+
 class Company(Base):
     __tablename__ = "companies"
 

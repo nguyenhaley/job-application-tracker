@@ -8,6 +8,11 @@ from auth import hash_password, verify_password, create_access_token
 from schemas import UserLogin
 from auth import get_current_user
 from fastapi.security import OAuth2PasswordRequestForm
+from schemas import ApplicationCreate, ApplicationOut
+from models import Application, Company
+
+# create FastAPI instance and the get_db() function to create a new database session for each request
+# auth.py tools used here to hash passwords, verify passwords, create JWT tokens, and get the current user from a token
 
 app = FastAPI()
 
@@ -17,8 +22,6 @@ def get_db():
         yield db
     finally:
         db.close()
-
-
 
 @app.post("/signup", response_model=UserOut)
 def signup(user: UserCreate, db: Session = Depends(get_db)): 
@@ -55,3 +58,28 @@ def login(credentials: UserLogin, db: Session = Depends(get_db)):
 @app.get("/me", response_model=UserOut)
 def read_current_user(current_user: User = Depends(get_current_user)):
     return current_user
+
+@app.post("/applications", response_model=ApplicationOut)
+def create_application(application: ApplicationCreate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    # check if company already exists in database
+    company = db.query(Company).filter(Company.name == application.company_name).first()
+    # if company doesn't exist, create a new company
+    if not company:
+        company = Company(name=application.company_name)
+        db.add(company)
+        db.commit()
+        db.refresh(company)
+
+    # create new application object with the company_id, role_title, source, date_applied, and user_id
+    new_application = Application(
+        company_id=company.id,
+        role_title=application.role_title,
+        source=application.source,
+        date_applied=application.date_applied,
+        user_id=current_user.id
+    )
+
+    db.add(new_application)
+    db.commit()
+    db.refresh(new_application)
+    return new_application

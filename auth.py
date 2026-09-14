@@ -2,11 +2,14 @@ from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from jose import jwt
 from fastapi import Depends, HTTPException
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 from database import SessionLocal
 from models import User
+
+# all of the security logic is in this file, including hashing passwords, 
+# verifying passwords, creating JWT tokens, and getting the current user from a token
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -28,7 +31,7 @@ def create_access_token(data: dict):
 
 # pulls token out of header and returns it as a python string
 # tokenUrl is the endpoint where the user will send their username/password to get a token
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+oauth2_scheme = HTTPBearer()
 
 def get_db():
     db = SessionLocal()
@@ -37,14 +40,14 @@ def get_db():
     finally:
         db.close()
 
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+def get_current_user(auth: HTTPAuthorizationCredentials = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     # error object to raise if the token is invalid or the user doesn't exist
     credentials_exception = HTTPException(status_code=401, detail="Could not validate credentials")
-    
+
     # jwt.decode() will take signed string and revert it back to dictionary
     # decoding also verifies the signature using SECRET_KEY
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(auth.credentials, SECRET_KEY, algorithms=[ALGORITHM])
         user_id = payload.get("sub")
         if user_id is None:
             raise credentials_exception
