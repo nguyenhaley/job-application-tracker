@@ -10,11 +10,20 @@ from auth import get_current_user
 from fastapi.security import OAuth2PasswordRequestForm
 from schemas import ApplicationCreate, ApplicationOut, StatusUpdate
 from models import Application, Company, StatusHistory
+from fastapi.middleware.cors import CORSMiddleware
 
 # create FastAPI instance and the get_db() function to create a new database session for each request
 # auth.py tools used here to hash passwords, verify passwords, create JWT tokens, and get the current user from a token
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://localhost:5174"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 def get_db():
     db = SessionLocal()
