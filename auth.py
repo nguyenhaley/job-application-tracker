@@ -7,6 +7,7 @@ from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 from database import SessionLocal
 from models import User
+import os
 
 # all of the security logic is in this file, including hashing passwords, 
 # verifying passwords, creating JWT tokens, and getting the current user from a token
@@ -19,7 +20,7 @@ def hash_password(password: str) -> str:
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
-SECRET_KEY = "replace-this-with-a-real-secret-later"
+SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
