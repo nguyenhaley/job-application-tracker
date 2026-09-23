@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
 from database import SessionLocal
 from models import User
 from schemas import UserCreate, UserOut
-from auth import hash_password
 from auth import hash_password, verify_password, create_access_token
 from schemas import UserLogin
 from auth import get_current_user
@@ -11,6 +10,8 @@ from fastapi.security import OAuth2PasswordRequestForm
 from schemas import ApplicationCreate, ApplicationOut, StatusUpdate
 from models import Application, Company, StatusHistory
 from fastapi.middleware.cors import CORSMiddleware
+
+DEMO_EMAIL = "demo1@gmail.com"
 
 # create FastAPI instance and the get_db() function to create a new database session for each request
 # auth.py tools used here to hash passwords, verify passwords, create JWT tokens, and get the current user from a token
@@ -31,6 +32,14 @@ def get_db():
         yield db
     finally:
         db.close()
+
+@app.post("/demo-login")
+def demo_login(db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == DEMO_EMAIL).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Demo account not configured")
+    token = create_access_token({"sub": str(user.id)})
+    return {"access_token": token, "token_type": "bearer"}
 
 @app.post("/signup", response_model=UserOut)
 def signup(user: UserCreate, db: Session = Depends(get_db)): 
