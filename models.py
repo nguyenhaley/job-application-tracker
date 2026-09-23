@@ -29,10 +29,11 @@ class Application(Base):
     company_id = Column(Integer, ForeignKey("companies.id"), nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     role_title = Column(String(255), nullable=False)
-    source = Column(String(100))
     date_applied = Column(Date, nullable=False)
     current_status = Column(String(50), default="applied")
     created_at = Column(DateTime, server_default=func.now())
+    location = Column(String(255), nullable=False)
+    application_link = Column(String(255), nullable=True)
 
     company = relationship("Company")
     user = relationship("User")

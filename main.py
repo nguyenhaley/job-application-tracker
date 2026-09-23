@@ -89,13 +89,14 @@ def create_application(application: ApplicationCreate, current_user: User = Depe
         db.commit()
         db.refresh(company)
 
-    # create new application object with the company_id, role_title, source, date_applied, and user_id
+    # create new application object with the company_id, role_title, date_applied, and user_id
     new_application = Application(
         company_id=company.id,
         role_title=application.role_title,
-        source=application.source,
         date_applied=application.date_applied,
-        user_id=current_user.id
+        user_id=current_user.id,
+        location=application.location,
+        application_link=application.application_link
     )
 
     db.add(new_application)
