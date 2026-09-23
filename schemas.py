@@ -33,6 +33,7 @@ class ApplicationCreate(BaseModel):
     date_applied: datetime.date
     location: str
     application_link: Optional[str] = None
+    current_status: str = "applied"
 
 # outgoing data built from a real ORM object
 class ApplicationOut(BaseModel):
@@ -43,6 +44,7 @@ class ApplicationOut(BaseModel):
     current_status: str
     location: str
     application_link: Optional[str] = None
+    current_status: str = "applied"
 
     class Config:
         from_attributes = True

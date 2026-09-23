@@ -96,7 +96,8 @@ def create_application(application: ApplicationCreate, current_user: User = Depe
         date_applied=application.date_applied,
         user_id=current_user.id,
         location=application.location,
-        application_link=application.application_link
+        application_link=application.application_link,
+        current_status=application.current_status
     )
 
     db.add(new_application)
