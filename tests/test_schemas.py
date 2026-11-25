@@ -11,7 +11,7 @@ def valid_application_data():
         "date_applied": "2026-11-24",
     }
 
-# TC-001 | Positive Unit Test
+# Positive Unit Test
 # Verify that valid application data is accepted
 def test_create_valid_application(valid_application_data):
     # Act
@@ -25,7 +25,7 @@ def test_create_valid_application(valid_application_data):
     assert application.application_link is None
     assert application.current_status == "applied"
 
-# TC-002 | Negative Unit Test
+# Negative Unit Test
 # Verify that invalid application data is rejected
 def test_missing_company_name(valid_application_data):
     # Arrange
@@ -33,7 +33,7 @@ def test_missing_company_name(valid_application_data):
     with pytest.raises(ValidationError):
         ApplicationCreate(**valid_application_data)
 
-# TC-003 | Negative Unit Test
+# Negative Unit Test
 # Verify invalid application date 
 def test_invalid_date(valid_application_data):
     # Arrange
@@ -47,7 +47,7 @@ def test_invalid_date(valid_application_data):
         for error in errors
     )
 
-# TC-004 | Negative Unit Test
+# Negative Unit Test
 # verify an invalid company name is rejected
 @pytest.mark.parametrize("company_name", [
     "",
@@ -72,7 +72,7 @@ def test_invalid_company_name(
         for error in errors
     )
 
-# TC-005 | Positive Unit Test
+# Positive Unit Test
 # Verify surrounding whitespace is removed
 @pytest.mark.parametrize(
     "input_name, expected_name",

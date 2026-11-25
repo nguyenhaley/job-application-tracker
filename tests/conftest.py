@@ -61,3 +61,44 @@ def client(testing_session_factory):
     finally:
         app.dependency_overrides.pop(main_get_db, None)
         app.dependency_overrides.pop(auth_get_db, None)
+
+@pytest.fixture
+def valid_signup_data():
+    return {
+        "email": "test@example.com",
+        "password": "fake_password"
+    }
+
+@pytest.fixture
+def auth_headers(client, valid_signup_data):
+    # Register a user
+    signup_response = client.post("/signup", json=valid_signup_data)
+    assert signup_response.status_code == 200
+    # Log in
+    login_response = client.post("/login", json=valid_signup_data)
+    assert login_response.status_code == 200
+    # Extract the access token
+    access_token = login_response.json()["access_token"]
+    # Return the authorization headers
+    return {"Authorization": f"Bearer {access_token}"}
+
+@pytest.fixture
+def create_authenticated_user(client):
+    def _create_authenticated_user(email):
+        # Construct signup data
+        signup_data = {
+            "email": email,
+            "password": "fake_password"
+        }
+        # Register the user
+        signup_response = client.post("/signup", json=signup_data)
+        assert signup_response.status_code == 200
+        # Log in
+        login_response = client.post("/login", json=signup_data)
+        assert login_response.status_code == 200
+        # Extract the access token
+        access_token = login_response.json()["access_token"]
+        # Return authorization headers
+        return {"Authorization": f"Bearer {access_token}"}
+
+    return _create_authenticated_user
