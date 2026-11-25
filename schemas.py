@@ -1,6 +1,6 @@
-from pydantic import BaseModel, EmailStr
 import datetime
 from typing import Optional
+from pydantic import BaseModel, EmailStr, ConfigDict, Field
 
 # contains API shape (what data is allowed to be sent to the API and what data is returned from the API)
 
@@ -12,8 +12,7 @@ class UserOut(BaseModel):
     id: int
     email: str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class UserLogin(BaseModel):
     email: EmailStr
@@ -23,15 +22,14 @@ class CompanyOut(BaseModel):
     id: int
     name: str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 # incoming data from a user typing into a form
 class ApplicationCreate(BaseModel):
-    company_name: str
+    company_name: str = Field(min_length=1)
     role_title: str
     date_applied: datetime.date
-    location: str
+    location: Optional[str] = None
     application_link: Optional[str] = None
     current_status: str = "applied"
 
@@ -42,12 +40,11 @@ class ApplicationOut(BaseModel):
     role_title: str
     date_applied: datetime.date
     current_status: str
-    location: str
+    location: Optional[str] = None
     application_link: Optional[str] = None
     current_status: str = "applied"
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class StatusUpdate(BaseModel):
     status: str
