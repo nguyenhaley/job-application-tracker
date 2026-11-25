@@ -1,6 +1,8 @@
 import datetime
 from typing import Optional
 from pydantic import BaseModel, EmailStr, ConfigDict, Field
+from pydantic import StringConstraints
+from typing import Annotated
 
 # contains API shape (what data is allowed to be sent to the API and what data is returned from the API)
 
@@ -26,8 +28,14 @@ class CompanyOut(BaseModel):
 
 # incoming data from a user typing into a form
 class ApplicationCreate(BaseModel):
-    company_name: str = Field(min_length=1)
-    role_title: str
+    company_name: Annotated[
+        str,
+        StringConstraints(strip_whitespace=True, min_length=1)
+    ]
+    role_title: Annotated[
+        str,
+        StringConstraints(strip_whitespace=True, min_length=1)
+    ]
     date_applied: datetime.date
     location: Optional[str] = None
     application_link: Optional[str] = None
