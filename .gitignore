@@ -6,3 +6,10 @@ node_modules/
 
 .venv/
 .pytest_cache/
+
+# Local environment configuration
+.env.*
+!.env.example
+
+# Local virtual environment backups
+.venv-old/
